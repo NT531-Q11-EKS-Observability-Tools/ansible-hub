@@ -1,12 +1,28 @@
+# ======================================================
+# ===== ENSURE NETFILTER-PERSISTENT IS INSTALLED ======
+# netfilter-persistent is used to persist iptables rules
+# across system reboots. Without this, all iptables rules
+# would be lost after a reboot.
+# ======================================================
 - name: Ensure netfilter-persistent is installed
   apt:
     name: netfilter-persistent
     state: present
     update_cache: yes
 
+
 # ======================================================
-# ===== ALLOW ESTABLISHED / RELATED CONNECTIONS ========
-# Required for stateful return traffic
+# ===== ALLOW ESTABLISHED / RELATED CONNECTIONS =======
+# This rule allows return traffic for already established
+# connections to pass through the FORWARD chain.
+#
+# Why this is required:
+# - VPN clients initiate connections to VPC resources
+# - Response packets from VPC must be allowed back
+# - Without this rule, return traffic would be dropped,
+#   causing SSH, kubectl, and other connections to hang
+#
+# This enables stateful forwarding behavior.
 # ======================================================
 - name: Allow established and related traffic
   iptables:
@@ -19,7 +35,16 @@
 
 # ======================================================
 # ===== FORWARD VPN → VPC ==============================
-# Cho phép client VPN (10.8.0.0/24) đi vào VPC (10.20.0.0/16)
+# Allow traffic initiated from VPN clients (overlay network)
+# to reach VPC resources (underlay network).
+#
+# Packet flow:
+# VPN client (10.8.0.x)
+#   → OpenVPN tunnel interface (tun0)
+#   → OpenVPN EC2
+#   → Private VPC interface ({{ openvpn_private_iface }})
+#
+# This rule permits NEW connections from VPN to VPC.
 # ======================================================
 - name: Allow VPN clients to access VPC
   iptables:
@@ -30,9 +55,19 @@
     jump: ACCEPT
     state: present
 
+
 # ======================================================
 # ===== FORWARD VPC → VPN ==============================
-# Cho phép traffic trả về từ VPC quay lại VPN client
+# Allow return traffic from VPC back to VPN clients.
+#
+# Packet flow:
+# VPC resource (10.20.x.x)
+#   → OpenVPN EC2 ({{ openvpn_private_iface }})
+#   → OpenVPN tunnel interface (tun0)
+#   → VPN client (10.8.0.x)
+#
+# This rule allows bidirectional forwarding between
+# the underlay (VPC) and overlay (VPN) networks.
 # ======================================================
 - name: Allow return traffic from VPC to VPN
   iptables:
