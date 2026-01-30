@@ -19,9 +19,11 @@ server {{ openvpn_network }} {{ openvpn_netmask }}
 # This avoids dependency on external variables during
 # staging and lab deployments.
 #
-# VPC CIDR: 10.0.0.0/16
+# VPC CIDR: {{ vpc_network }}/{{ vpc_netmask }}
 # ======================================================
-push "route 10.20.0.0 255.255.0.0"
+# PUSH ROUTE VPC CHO CLIENT
+# ======================================================
+push "route {{ vpc_network }} {{ vpc_netmask }}"
 
 client-to-client
 

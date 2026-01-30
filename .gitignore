@@ -1,0 +1,43 @@
+# =========================
+# Ansible runtime files
+# =========================
+*.retry
+*.log
+*.tmp
+.cache/
+__pycache__/
+*.pyc
+
+# =========================
+# Inventory (REAL)
+# =========================
+inventories/**/*.ini
+
+# Allow inventory examples
+!inventories/**/*.ini.example
+
+# =========================
+# VPN artifacts
+# =========================
+vpn/*
+!vpn/.gitkeep
+*.ovpn
+
+# =========================
+# Secrets / certs
+# =========================
+*.key
+*.pem
+*.crt
+*.vault
+*.secret
+*.secrets
+
+# =========================
+# OS / Editor noise
+# =========================
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
