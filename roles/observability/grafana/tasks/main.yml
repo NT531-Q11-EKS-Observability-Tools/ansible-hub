@@ -85,6 +85,51 @@
     mode: '0644'
   tags: [grafana, grafana_config]
 
+
+# =========================
+# GRAFANA | DASHBOARDS
+# =========================
+
+- name: Ensure Grafana dashboard provisioning directory exists
+  file:
+    path: "{{ grafana_dashboard_provisioning_dir }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+  tags: [grafana, grafana_dashboards]
+
+- name: Ensure Grafana dashboard storage directory exists
+  file:
+    path: "{{ grafana_dashboard_dir }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+  tags: [grafana, grafana_dashboards]
+
+- name: Provision Grafana dashboards
+  template:
+    src: dashboards.yml.j2
+    dest: "{{ grafana_dashboard_provisioning_dir }}/kubernetes.yml"
+    owner: grafana
+    group: grafana
+    mode: '0644'
+  notify: Restart Grafana
+  tags: [grafana, grafana_dashboards]
+
+- name: Install Kubernetes dashboards
+  copy:
+    src: "{{ item }}"
+    dest: "{{ grafana_dashboard_dir }}/{{ item | basename }}"
+    owner: grafana
+    group: grafana
+    mode: '0644'
+  with_fileglob:
+    - "dashboards/*.json"
+  notify: Restart Grafana
+  tags: [grafana, grafana_dashboards]
+
 # =========================
 # GRAFANA | SERVICE
 # =========================

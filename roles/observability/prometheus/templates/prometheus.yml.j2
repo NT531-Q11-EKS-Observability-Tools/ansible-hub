@@ -56,40 +56,19 @@ scrape_configs:
 
 
   # ------------------------------------------------------------
-  # kube-state-metrics (External Prometheus – via NodeIP)
+  # kube-state-metrics (External Prometheus – via NodePort)
   # Namespace : monitoring
-  # Service   : kube-state-metrics
-  # Scrape    : NodeIP:8080
+  # Service   : kube-state-metrics (NodePort 30080)
+  # Scrape    : NodeIP:30080
   # ------------------------------------------------------------
   - job_name: "k0s-kube-state-metrics"
-    kubernetes_sd_configs:
-      - role: endpoints
-        kubeconfig_file: /etc/prometheus/kubeconfig
-
-    relabel_configs:
-      # Keep monitoring namespace
-      - source_labels: [__meta_kubernetes_namespace]
-        action: keep
-        regex: monitoring
-
-      # Match kube-state-metrics service
-      - source_labels: [__meta_kubernetes_service_name]
-        action: keep
-        regex: kube-state-metrics
-
-      # Keep only node endpoints (not pod IP)
-      - source_labels: [__meta_kubernetes_endpoint_address_target_kind]
-        action: keep
-        regex: Node
-
-      # Use Node IP instead of Pod IP
-      - source_labels: [__meta_kubernetes_endpoint_address]
-        target_label: __address__
-        replacement: $1:8080
-
-      # Attach cluster label
-      - target_label: cluster
-        replacement: k0s
+    static_configs:
+      - targets:
+          - "{{ hostvars['controller'].ansible_host }}:30080"
+          - "{{ hostvars['worker-1'].ansible_host }}:30080"
+          - "{{ hostvars['worker-2'].ansible_host }}:30080"
+        labels:
+          cluster: k0s
 
 
 rule_files:

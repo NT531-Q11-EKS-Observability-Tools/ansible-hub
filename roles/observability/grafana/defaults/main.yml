@@ -1,0 +1,2 @@
+grafana_dashboard_provisioning_dir: /etc/grafana/provisioning/dashboards
+grafana_dashboard_dir: /var/lib/grafana/dashboards/kubernetes
