@@ -7,7 +7,7 @@ config:
     filename: /run/promtail/positions.yaml
 
   clients:
-    - url: http://10.0.5.127:3100/loki/api/v1/push
+    - url: http://{{ hostvars['obser-2'].ansible_host }}:3100/loki/api/v1/push
       tenant_id: ""
 
   scrape_configs:

@@ -4,14 +4,14 @@
     name:
       - unzip
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Create loki user
   user:
     name: loki
-    system: yes
+    system: true
     shell: /sbin/nologin
-    create_home: no
+    create_home: false
 
 - name: Create Loki directories
   file:
@@ -37,7 +37,7 @@
   unarchive:
     src: /tmp/loki.zip
     dest: /opt/loki
-    remote_src: yes
+    remote_src: true
     creates: /opt/loki/loki-linux-amd64
 
 - name: Install Loki binary
@@ -47,7 +47,8 @@
     owner: root
     group: root
     mode: "0755"
-    remote_src: yes
+    remote_src: true
+  notify: Restart Loki
 
 - name: Render Loki config
   template:
@@ -56,6 +57,7 @@
     owner: loki
     group: loki
     mode: "0644"
+  notify: Restart Loki
 
 - name: Create systemd service for Loki
   copy:
@@ -75,12 +77,15 @@
 
       [Install]
       WantedBy=multi-user.target
-
-- name: Reload systemd
-  command: systemctl daemon-reexec
+  notify:
+    - Reload systemd daemon
+    - Restart Loki
 
 - name: Enable and start Loki
   systemd:
     name: loki
-    enabled: yes
+    enabled: true
     state: started
+
+- name: Flush handlers to apply Loki changes immediately
+  meta: flush_handlers

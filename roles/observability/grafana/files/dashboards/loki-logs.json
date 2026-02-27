@@ -3,7 +3,7 @@
   "title": "Loki - System & Application Logs",
   "tags": ["loki", "kubernetes", "logs"],
   "schemaVersion": 37,
-  "version": 1,
+  "version": 6,
   "timezone": "browser",
   "refresh": "10s",
   "time": {
@@ -14,18 +14,19 @@
     {
       "id": 1,
       "type": "stat",
-      "title": "Total Logs",
+      "title": "System Total Logs",
       "datasource": "Loki",
-      "gridPos": {"x": 0, "y": 0, "w": 4, "h": 4},
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "sum(count_over_time({namespace=~\".+\"}[$__range]))",
-          "refId": "A"
+          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"}[$__range]))",
+          "refId": "A",
+          "queryType": "instant"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": ["sum"],
           "fields": "",
           "values": false
         },
@@ -36,25 +37,30 @@
         "justifyMode": "center"
       },
       "fieldConfig": {
-        "defaults": {"unit": "short"},
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        },
         "overrides": []
       }
     },
     {
       "id": 2,
       "type": "stat",
-      "title": "System Logs",
+      "title": "Total System Error Logs",
       "datasource": "Loki",
-      "gridPos": {"x": 4, "y": 0, "w": 4, "h": 4},
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
-          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"}[$__range]))",
-          "refId": "A"
+          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"} |~ \"(?i)(error|exception|failed|panic)\" [$__range]))",
+          "refId": "A",
+          "queryType": "instant"
         }
       ],
       "options": {
         "reduceOptions": {
-          "calcs": ["lastNotNull"],
+          "calcs": ["sum"],
           "fields": "",
           "values": false
         },
@@ -65,140 +71,50 @@
         "justifyMode": "center"
       },
       "fieldConfig": {
-        "defaults": {"unit": "short"},
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
         "overrides": []
       }
     },
     {
       "id": 3,
-      "type": "stat",
-      "title": "App Logs (mini-ecommerce)",
-      "datasource": "Loki",
-      "gridPos": {"x": 8, "y": 0, "w": 4, "h": 4},
-      "targets": [
-        {
-          "expr": "sum(count_over_time({namespace=~\"mini-ecommerce.*\"}[$__range]))",
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "horizontal",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {"unit": "short"},
-        "overrides": []
-      }
-    },
-    {
-      "id": 4,
-      "type": "stat",
-      "title": "Errors",
-      "datasource": "Loki",
-      "gridPos": {"x": 12, "y": 0, "w": 4, "h": 4},
-      "targets": [
-        {
-          "expr": "sum(count_over_time({namespace=~\".+\"} |= \"error\" [$__range]))",
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "horizontal",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {"unit": "short"},
-        "overrides": []
-      }
-    },
-    {
-      "id": 5,
-      "type": "stat",
-      "title": "Warnings",
-      "datasource": "Loki",
-      "gridPos": {"x": 16, "y": 0, "w": 4, "h": 4},
-      "targets": [
-        {
-          "expr": "sum(count_over_time({namespace=~\".+\"} |= \"warn\" [$__range]))",
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "horizontal",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {"unit": "short"},
-        "overrides": []
-      }
-    },
-    {
-      "id": 6,
-      "type": "stat",
-      "title": "Infos",
-      "datasource": "Loki",
-      "gridPos": {"x": 20, "y": 0, "w": 4, "h": 4},
-      "targets": [
-        {
-          "expr": "sum(count_over_time({namespace=~\".+\"} |= \"info\" [$__range]))",
-          "refId": "A"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"],
-          "fields": "",
-          "values": false
-        },
-        "orientation": "horizontal",
-        "textMode": "auto",
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {"unit": "short"},
-        "overrides": []
-      }
-    },
-    {
-      "id": 7,
       "type": "timeseries",
-      "title": "System Log Volume (by Namespace)",
+      "title": "System Log Volume (by Level)",
       "datasource": "Loki",
-      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 6},
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 4 },
       "targets": [
         {
-          "expr": "sum by (namespace) (count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"}[$__interval]))",
-          "refId": "A"
+          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"} |~ \"(?i)(error|exception|failed|panic)\" [$__interval]))",
+          "refId": "A",
+          "legendFormat": "ERROR"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"} |~ \"(?i)(warn|warning)\" [$__interval]))",
+          "refId": "B",
+          "legendFormat": "WARN"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"} !~ \"(?i)(error|exception|failed|panic|warn|warning)\" [$__interval]))",
+          "refId": "C",
+          "legendFormat": "INFO"
         }
       ],
       "fieldConfig": {
-        "defaults": {"unit": "short"},
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
         "overrides": []
       },
       "options": {
@@ -209,19 +125,149 @@
       }
     },
     {
-      "id": 8,
-      "type": "timeseries",
-      "title": "Application Log Volume (mini-ecommerce)",
+      "id": 4,
+      "type": "logs",
+      "title": "System Logs",
       "datasource": "Loki",
-      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 6},
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "sum by (namespace) (count_over_time({namespace=~\"mini-ecommerce.*\"}[$__interval]))",
-          "refId": "A"
+          "expr": "{namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"}",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false
+      }
+    },
+    {
+      "id": 5,
+      "type": "logs",
+      "title": "System Error Logs",
+      "datasource": "Loki",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "{namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"} |~ \"(?i)(error|exception|failed|panic)\"",
+          "refId": "A",
+          "queryType": "range"
+        }
+      ],
+      "options": {
+        "showTime": true,
+        "showLabels": false,
+        "wrapLogMessage": true,
+        "prettifyLogMessage": false
+      }
+    },
+    {
+      "id": 6,
+      "type": "stat",
+      "title": "Application Total Logs (mini-ecommerce)",
+      "datasource": "Loki",
+      "gridPos": { "x": 0, "y": 12, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=\"mini-ecommerce\"}[$__range]))",
+          "refId": "A",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": { "mode": "fixed", "fixedColor": "green" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "type": "stat",
+      "title": "Total Application Error Logs (mini-ecommerce)",
+      "datasource": "Loki",
+      "gridPos": { "x": 6, "y": 12, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=\"mini-ecommerce\"} |~ \"(?i)(error|exception|failed|panic)\" [$__range]))",
+          "refId": "A",
+          "queryType": "instant"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": ["sum"],
+          "fields": "",
+          "values": false
+        },
+        "orientation": "horizontal",
+        "textMode": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "noValue": "0",
+          "color": { "mode": "fixed", "fixedColor": "red" }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "type": "timeseries",
+      "title": "Application Log Volume (by Level)",
+      "datasource": "Loki",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 4 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({namespace=\"mini-ecommerce\"} |~ \"(?i)(error|exception|failed|panic)\" [$__interval]))",
+          "refId": "A",
+          "legendFormat": "ERROR"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=\"mini-ecommerce\"} |~ \"(?i)(warn|warning)\" [$__interval]))",
+          "refId": "B",
+          "legendFormat": "WARN"
+        },
+        {
+          "expr": "sum(count_over_time({namespace=\"mini-ecommerce\"} !~ \"(?i)(error|exception|failed|panic|warn|warning)\" [$__interval]))",
+          "refId": "C",
+          "legendFormat": "INFO"
         }
       ],
       "fieldConfig": {
-        "defaults": {"unit": "short"},
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "drawStyle": "bars",
+            "barAlignment": 0,
+            "fillOpacity": 80,
+            "stacking": {
+              "mode": "normal",
+              "group": "A"
+            }
+          }
+        },
         "overrides": []
       },
       "options": {
@@ -234,13 +280,14 @@
     {
       "id": 9,
       "type": "logs",
-      "title": "System Logs",
+      "title": "Application Logs (mini-ecommerce)",
       "datasource": "Loki",
-      "gridPos": {"x": 0, "y": 10, "w": 12, "h": 8},
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "{namespace=~\"kube-system|monitoring|kube-public|kube-node-lease\"}",
-          "refId": "A"
+          "expr": "{namespace=\"mini-ecommerce\"}",
+          "refId": "A",
+          "queryType": "range"
         }
       ],
       "options": {
@@ -253,13 +300,14 @@
     {
       "id": 10,
       "type": "logs",
-      "title": "Application Logs (mini-ecommerce)",
+      "title": "Application Error Logs (mini-ecommerce)",
       "datasource": "Loki",
-      "gridPos": {"x": 12, "y": 10, "w": 12, "h": 8},
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
       "targets": [
         {
-          "expr": "{namespace=~\"mini-ecommerce.*\"}",
-          "refId": "A"
+          "expr": "{namespace=\"mini-ecommerce\"} |~ \"(?i)(error|exception|failed|panic)\"",
+          "refId": "A",
+          "queryType": "range"
         }
       ],
       "options": {

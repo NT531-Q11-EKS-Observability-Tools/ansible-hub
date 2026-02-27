@@ -5,6 +5,18 @@ server:
   http_listen_port: 3100
   grpc_listen_port: 9096
 
+frontend:
+  # Prevent 429 "too many outstanding requests" when Grafana refreshes multiple panels/tabs
+  max_outstanding_per_tenant: 8192
+  compress_responses: true
+
+querier:
+  max_concurrent: 64
+
+query_range:
+  align_queries_with_step: true
+  parallelise_shardable_queries: false
+
 common:
   instance_addr: 0.0.0.0
   path_prefix: /var/lib/loki
@@ -32,6 +44,8 @@ limits_config:
   ingestion_rate_mb: 16
   ingestion_burst_size_mb: 32
   max_streams_per_user: 0
+  split_queries_by_interval: 30m
+  max_query_parallelism: 32
 
 analytics:
   reporting_enabled: false
