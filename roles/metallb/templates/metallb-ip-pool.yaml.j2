@@ -1,17 +1,19 @@
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: k0s-ip-pool
-  namespace: metallb-system
+  name: {{ metallb_ip_pool_name }}
+  namespace: {{ metallb_namespace }}
 spec:
   addresses:
-    - 10.0.2.200-10.0.2.210
+{% for address in metallb_ip_pool_addresses_normalized %}
+    - {{ address }}
+{% endfor %}
 ---
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 metadata:
-  name: k0s-l2-adv
-  namespace: metallb-system
+  name: {{ metallb_l2_advertisement_name }}
+  namespace: {{ metallb_namespace }}
 spec:
   ipAddressPools:
-    - k0s-ip-pool
+    - {{ metallb_ip_pool_name }}

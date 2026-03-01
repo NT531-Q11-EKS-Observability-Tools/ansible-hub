@@ -1,0 +1,21 @@
+- name: Install ingress-nginx controller
+  become: true
+  command: k0s kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/cloud/deploy.yaml
+  register: ingress_nginx_apply
+  retries: 10
+  delay: 15
+  until: ingress_nginx_apply.rc == 0
+  changed_when: ingress_nginx_apply.stdout is search('created')
+  tags:
+    - ingress
+
+- name: Wait for ingress-nginx controller pod ready
+  become: true
+  command: k0s kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=180s
+  register: ingress_nginx_wait
+  retries: 10
+  delay: 15
+  until: ingress_nginx_wait.rc == 0
+  changed_when: false
+  tags:
+    - ingress
